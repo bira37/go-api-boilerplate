@@ -12,7 +12,7 @@ This API model was made using:
 
 ### Setup
 
-To create new migrations on the model, it is necessary to use [golang-migrate/migrate cmd tool](https://github.com/golang-migrate/migrate/tree/master/cmd/migrate). On Ubuntu you need to do the following steps:
+To create new migrations on the model, it is necessary to use [golang-migrate/migrate command-line tool](https://github.com/golang-migrate/migrate/tree/master/cmd/migrate). On Ubuntu you need to do the following steps:
 
 ```
 sudo su (enters superuser)
@@ -44,4 +44,4 @@ migrate -database <connection_string> -path infra/migrations up # to undo all cu
 
 The `test.sh` file contains all needed commands to execute both integration and unit tests. The template was built on top of CockroachDB. To execute the test script, you need to launch one CockroachDB instance using `docker-compose up -d` command.
 
-Unit tests uses mocks created by GoMock. It is necessary to have [mockgen](github.com/golang/mock/mockgen) command line tool installed to run the test script.
+Unit tests uses mocks created by GoMock. It is necessary to have [mockgen command-line tool](github.com/golang/mock/mockgen) installed to run the test script.
