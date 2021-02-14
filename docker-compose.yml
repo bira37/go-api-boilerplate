@@ -1,0 +1,12 @@
+version: "3.2"
+services:
+  cockroachdb:
+    container_name: cockroachdb
+    image: cockroachdb/cockroach:v20.1.9
+    restart: always
+    volumes:
+      - /cockroach/cockroach-data
+    command: start-single-node --insecure --listen-addr=0.0.0.0
+    ports:
+      - 26257:26257
+      - 8080:8080
