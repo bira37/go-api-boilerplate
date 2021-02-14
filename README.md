@@ -45,3 +45,9 @@ migrate -database <connection_string> -path infra/migrations up # to undo all cu
 The `test.sh` file contains all needed commands to execute both integration and unit tests. The template was built on top of CockroachDB. To execute the test script, you need to launch one CockroachDB instance using `docker-compose up -d` command.
 
 Unit tests uses mocks created by GoMock. It is necessary to have [gomock's mockgen command-line tool](github.com/golang/mock/mockgen) installed to run the test script.
+
+## Design
+
+Design was inspired by Clean Architecture, Repository Pattern and .NET applications, with some differences in organization and functionality.
+
+![API Design](./apidesign.png)
