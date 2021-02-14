@@ -1,8 +1,6 @@
 package repository
 
 import (
-	"fmt"
-
 	repositoryContract "bira.io/template/contract/repository"
 	"bira.io/template/infra"
 	"bira.io/template/model"
@@ -62,7 +60,6 @@ func (r *userRepository) FindUserByUsername(username string) (model.User, error)
 		`, username)
 
 		if err != nil {
-			fmt.Println(err.Error())
 			return infra.NewSqlDbErrInternal(err.Error())
 		}
 

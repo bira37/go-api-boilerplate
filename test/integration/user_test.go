@@ -1,8 +1,6 @@
 package integration
 
 import (
-	"fmt"
-
 	"bira.io/template/dto"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -52,7 +50,6 @@ var _ = Describe("User", func() {
 			}, &response)
 
 			Expect(status).To(Equal(200))
-			fmt.Println(response)
 		})
 	})
 })

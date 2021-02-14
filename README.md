@@ -42,9 +42,17 @@ migrate -database <connection_string> -path infra/migrations up # to undo all cu
 
 ## Testing
 
-The `test.sh` file contains all needed commands to execute both integration and unit tests. The template was built on top of CockroachDB. To execute the test script, you need to launch one CockroachDB instance using `docker-compose up -d` command.
+### Mocking
 
 Unit tests uses mocks created by GoMock. It is necessary to have [gomock's mockgen command-line tool](github.com/golang/mock/mockgen) installed to run the test script. Once you have it installed, you can also generate mocks running `generate_mocks.sh` script without running tests.
+
+### Test script
+
+The `test.sh` file contains all needed commands to execute both integration and unit tests. The template was built on top of CockroachDB. To execute the test script, you need to launch one CockroachDB instance using `docker-compose up -d` command.
+
+### Coverage
+
+The test script generates a coverage file `coverage.out` and a HTML `cover.html` that displays code coverage for each file separately. Using [gocov's command-line tool](https://github.com/axw/gocov) you can also run `total_coverage.sh` script to parse `coverage.out` and see the resulting total coverage.
 
 ## Design
 

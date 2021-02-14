@@ -1,0 +1,1 @@
+gocov convert coverage.out | gocov report
