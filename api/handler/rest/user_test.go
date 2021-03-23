@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/bira37/go-rest-api/api/domain/db"
 	"github.com/bira37/go-rest-api/api/domain/user"
 	"github.com/bira37/go-rest-api/api/mock"
 	"github.com/brianvoe/gofakeit/v6"
@@ -30,56 +31,93 @@ func GenUser(username string) user.Model {
 }
 
 func TestMe(t *testing.T) {
-	res := httptest.NewRecorder()
-	gin.SetMode(gin.TestMode)
-	c, r := gin.CreateTestContext(res)
-
-	mockDb := new(mock.MockDB)
-	mockUserStore := new(mock.MockUserStore)
-
-	handler := NewUser(mockDb, mockUserStore)
-
-	username := "test"
-
-	userModel := GenUser(username)
-
-	mockUserStore.On("FindByUsername", username, tmock.Anything).Return(userModel, nil)
-
-	r.Use(func(c *gin.Context) {
-		c.Set("username", username)
-		c.Next()
-	})
-
-	r.GET("/test-me", handler.Me)
-
-	var err error
-
-	c.Request, err = http.NewRequest(http.MethodGet, "/test-me", nil)
-
-	if err != nil {
-		t.Errorf("unexpected error: %v", err)
+	tests := []struct {
+		username           string
+		expectedExists     bool
+		expectedResult     user.Model
+		expectedErr        error
+		expectedErrorCode  string
+		expectedStatusCode int
+	}{
+		{
+			username:           "success",
+			expectedExists:     true,
+			expectedResult:     GenUser("success"),
+			expectedErr:        nil,
+			expectedStatusCode: 200,
+		},
+		{
+			username:           "fail",
+			expectedExists:     false,
+			expectedResult:     user.Model{},
+			expectedErr:        db.ErrDBNotFound("User not found."),
+			expectedErrorCode:  "not_found",
+			expectedStatusCode: 404,
+		},
 	}
 
-	r.ServeHTTP(res, c.Request)
+	for _, tc := range tests {
+		res := httptest.NewRecorder()
+		gin.SetMode(gin.TestMode)
+		c, r := gin.CreateTestContext(res)
 
-	if res.Result().StatusCode != 200 {
-		t.Errorf("error on handler: %v", res.Body.String())
+		mockDb := new(mock.MockDB)
+		mockUserStore := new(mock.MockUserStore)
+
+		handler := NewUser(mockDb, mockUserStore)
+
+		mockUserStore.On("FindByUsername", tc.username, tmock.Anything).Return(tc.expectedResult, tc.expectedErr)
+
+		r.Use(func(c *gin.Context) {
+			c.Set("username", tc.username)
+			c.Next()
+		})
+
+		r.GET("/test-me", handler.Me)
+
+		var err error
+
+		c.Request, err = http.NewRequest(http.MethodGet, "/test-me", nil)
+
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+
+		r.ServeHTTP(res, c.Request)
+
+		if res.Result().StatusCode != tc.expectedStatusCode {
+			t.Errorf("expected status %v, got %v", tc.expectedStatusCode, res.Result().StatusCode)
+		}
+
+		if tc.expectedExists {
+			var meResponse user.MeResponse
+
+			err = json.NewDecoder(res.Body).Decode(&meResponse)
+
+			if err != nil {
+				t.Errorf("unexpected error: %v", err)
+			}
+
+			if meResponse.Email != tc.expectedResult.Email ||
+				meResponse.Id != tc.expectedResult.Id ||
+				meResponse.Name != tc.expectedResult.Name ||
+				meResponse.Username != tc.expectedResult.Username {
+				t.Errorf("error: expected equivalent to '%v', got '%v'", tc.expectedResult, meResponse)
+			}
+		} else {
+			var errorMsg ErrorResponse
+
+			err = json.NewDecoder(res.Body).Decode(&errorMsg)
+
+			if err != nil {
+				t.Errorf("unexpected error: %v", err)
+			}
+
+			if errorMsg.Code != tc.expectedErrorCode {
+				t.Errorf("expected code %v, got %v", tc.expectedErrorCode, errorMsg.Code)
+			}
+		}
+
+		mockUserStore.AssertExpectations(t)
 	}
-
-	var meResponse user.MeResponse
-
-	err = json.NewDecoder(res.Body).Decode(&meResponse)
-
-	if err != nil {
-		t.Errorf("unexpected error: %v", err)
-	}
-
-	if meResponse.Email != userModel.Email ||
-		meResponse.Id != userModel.Id ||
-		meResponse.Name != userModel.Name ||
-		meResponse.Username != userModel.Username {
-		t.Errorf("error: expected equivalent to '%v', got '%v'", userModel, meResponse)
-	}
-
-	mockUserStore.AssertExpectations(t)
 }

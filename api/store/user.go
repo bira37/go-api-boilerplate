@@ -28,7 +28,7 @@ func (r *User) Insert(user user.Model, connection db.Connection) (user.Model, er
 		`, user)
 
 	if err != nil {
-		return user, db.NewError(db.ErrDBInternalError, err.Error())
+		return user, db.ErrDBInternal(err.Error())
 	}
 
 	return user, err
@@ -48,8 +48,8 @@ func (r *User) FindByUsername(username string, connection db.Connection) (user.M
 	case nil:
 		return user, nil
 	case sql.ErrNoRows:
-		return user, db.NewError(db.ErrDBNotFound, "User not found.")
+		return user, db.ErrDBNotFound("User not found.")
 	default:
-		return user, db.NewError(db.ErrDBInternalError, err.Error())
+		return user, db.ErrDBInternal(err.Error())
 	}
 }

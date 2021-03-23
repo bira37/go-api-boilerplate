@@ -2,60 +2,26 @@
 
 This API model was made using:
 
-- [Migrate (golang-migrate/migrate)](https://github.com/golang-migrate/migrate) for migration handling
+- [Goose (pressly/goose)](https://github.com/pressly/goose) for migration handling
 - [Gin (gin-gonic)](https://github.com/gin-gonic/gin) to construct API handlers and middlewares
 - [Sqlx (jmoiron/sqlx)](https://github.com/jmoiron/sqlx) to make the database access layer
-- [Ginkgo (onsi/ginkgo)](https://github.com/onsi/ginkgo) for unit and integration tests construction
-- [GoMock (golang/mock)](https://github.com/golang/mock) to create mocks for API services and repository layer
+- [Testify (stretchr/testify)](https://github.com/stretchr/testify) for mocking dependencies on unit testing
 
 ## Migrations
 
-### Setup
-
-To create new migrations on the model, it is necessary to use [golang-migrate/migrate command-line tool](https://github.com/golang-migrate/migrate/tree/master/cmd/migrate). On Ubuntu you need to do the following steps:
+Migrations use goose CLI tool. New migrations can be generated executing cmd/api/migrate/main.go
 
 ```
-sudo su (enters superuser, if you need to)
-curl -L https://packagecloud.io/golang-migrate/migrate/gpgkey | apt-key add -
-echo "deb https://packagecloud.io/golang-migrate/migrate/ubuntu/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/migrate.list
-apt-get update
-apt-get install -y migrate
-(exits superuser)
-```
-
-### Usage
-
-To create a new migration, use the following command:
-
-```
-migrate create -ext sql -dir infra/migrations -seq <migration_name>
-```
-
-To run migrations, use the following commands:
-
-```
-migrate -database <connection_string> -path infra/migrations up 1 # to run one new migration
-migrate -database <connection_string> -path infra/migrations down 1 # to undo last migration
-migrate -database <connection_string> -path infra/migrations up # to run all new migrations
-migrate -database <connection_string> -path infra/migrations up # to undo all current migrations
+go run cmd/api/migrate/main.go up # Upgrade database to the latest migration
+go run cmd/api/migrate/main.go create <migration_name> # Create a new empty migration file on api/migrations directory
 ```
 
 ## Testing
 
-### Mocking
+Tests were made using stdlib testing package. They can be executed using the following commands:
 
-Unit tests uses mocks created by GoMock. It is necessary to have [gomock's mockgen command-line tool](github.com/golang/mock/mockgen) installed to run the test script. Once you have it installed, you can also generate mocks running `generate_mocks.sh` script without running tests.
-
-### Test script
-
-The `test.sh` file contains all needed commands to execute both integration and unit tests. The template was built on top of CockroachDB. To execute the test script, you need to launch one CockroachDB instance using `docker-compose up -d` command.
-
-### Coverage
-
-The test script generates a coverage file `coverage.out` and a HTML `cover.html` that displays code coverage for each file separately. Using [gocov's command-line tool](https://github.com/axw/gocov) you can also run `total_coverage.sh` script to parse `coverage.out` and see the resulting total coverage.
-
-## Design
-
-Design was inspired by Clean Architecture, Repository Pattern and .NET applications, with some differences in organization and functionality.
-
-![API Design](./apidesign.png)
+```
+go test ./... # Execute tests
+go test  -coverprofile coverage.out ./... # Execute tests and generate coverage output
+go tool cover -html=coverage.out -o coverage.html # Generate coverage.html file for better coverage visualization
+```

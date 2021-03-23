@@ -109,9 +109,9 @@ func buildValidationError(err validator.ValidationErrors) string {
 
 func mapDBError(err *db.Error) *Error {
 	switch err.Code {
-	case db.ErrDBNotFound:
+	case db.ErrDBNotFound("").Code:
 		return ErrNotFound(err.Message)
-	case db.ErrDBInternalError:
+	case db.ErrDBInternal("").Code:
 		return ErrInternalServer(err.Message)
 	default:
 		return ErrInternalServer("Internal error.")

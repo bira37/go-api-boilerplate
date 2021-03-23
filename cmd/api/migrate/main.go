@@ -7,11 +7,14 @@ import (
 	"log"
 	"os"
 	"os/exec"
+
+	"github.com/bira37/go-rest-api/api/config"
 )
 
 func main() {
+	Config := config.GetConfig()
 	os.Setenv("GOOSE_DRIVER", "postgres")
-	os.Setenv("GOOSE_DBSTRING", "postgres://root@localhost:26257?sslmode=disable")
+	os.Setenv("GOOSE_DBSTRING", Config.SQLDBConnectionString)
 
 	args := os.Args[1:]
 

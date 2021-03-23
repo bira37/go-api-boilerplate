@@ -2,12 +2,6 @@ package db
 
 import "fmt"
 
-// Database Errors
-const (
-	ErrDBInternalError = "ErrDBInternalError"
-	ErrDBNotFound      = "ErrDBNotFound"
-)
-
 type Error struct {
 	Code    string
 	Message string
@@ -18,6 +12,14 @@ func NewError(code string, message string) *Error {
 		Code:    code,
 		Message: message,
 	}
+}
+
+func ErrDBInternal(message string) *Error {
+	return NewError("ErrDBInternal", message)
+}
+
+func ErrDBNotFound(message string) *Error {
+	return NewError("ErrDBNotFound", message)
 }
 
 func (err *Error) Error() string {
