@@ -8,7 +8,7 @@ import (
 )
 
 func TestGenerateTokenSuccessfully(t *testing.T) {
-	jwt := Jwt{SigningSecret: uuid.New().String()}
+	jwt := NewJwt(uuid.New().String())
 
 	token, err := jwt.GenerateToken("username", 20, map[string]interface{}{"field": "value"})
 
@@ -22,7 +22,7 @@ func TestGenerateTokenSuccessfully(t *testing.T) {
 }
 
 func TestParseTokenSuccessfully(t *testing.T) {
-	jwt := Jwt{SigningSecret: uuid.New().String()}
+	jwt := NewJwt(uuid.New().String())
 
 	tokenString, _ := jwt.GenerateToken("username", 20, map[string]interface{}{"field": "value"})
 	token, err := jwt.ParseToken(tokenString)
@@ -37,7 +37,7 @@ func TestParseTokenSuccessfully(t *testing.T) {
 }
 
 func TestParseTokenExpired(t *testing.T) {
-	jwt := Jwt{SigningSecret: uuid.New().String()}
+	jwt := NewJwt(uuid.New().String())
 
 	tokenString, _ := jwt.GenerateToken("username", 0, map[string]interface{}{"exp": time.Now().UTC().Add(-time.Second * 10).Unix()})
 

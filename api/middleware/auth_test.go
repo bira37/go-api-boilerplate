@@ -14,7 +14,9 @@ func TestAuthMiddleware(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	c, r := gin.CreateTestContext(res)
 
-	r.Use(NewAuthMiddleware())
+	jwtParser := jwt.NewJwt(Config.JwtSigningSecret)
+
+	r.Use(NewAuthMiddleware(jwtParser))
 
 	r.GET("/test", func(c *gin.Context) {
 		user, exists := c.Get("username")
@@ -40,8 +42,6 @@ func TestAuthMiddleware(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
-
-	jwtParser := jwt.Jwt{SigningSecret: Config.JwtSigningSecret}
 
 	token, err := jwtParser.GenerateToken("testuser", 60, make(map[string]interface{}))
 

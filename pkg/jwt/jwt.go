@@ -7,11 +7,20 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-type Jwt struct {
+type Jwt interface {
+	GenerateToken(username string, expirationMinutes int, extraFields map[string]interface{}) (string, error)
+	ParseToken(tokenString string) (map[string]interface{}, error)
+}
+
+type JwtImpl struct {
 	SigningSecret string
 }
 
-func (j *Jwt) GenerateToken(username string, expirationMinutes int, extraFields map[string]interface{}) (string, error) {
+func NewJwt(signingSecret string) *JwtImpl {
+	return &JwtImpl{SigningSecret: signingSecret}
+}
+
+func (j *JwtImpl) GenerateToken(username string, expirationMinutes int, extraFields map[string]interface{}) (string, error) {
 	token := jwt.New(jwt.GetSigningMethod("HS256"))
 
 	mapClaims := jwt.MapClaims{
@@ -35,7 +44,7 @@ func (j *Jwt) GenerateToken(username string, expirationMinutes int, extraFields 
 	return tokenString, nil
 }
 
-func (j *Jwt) ParseToken(tokenString string) (map[string]interface{}, error) {
+func (j *JwtImpl) ParseToken(tokenString string) (map[string]interface{}, error) {
 	var claims map[string]interface{}
 
 	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {

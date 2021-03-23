@@ -16,14 +16,16 @@ import (
 type Auth struct {
 	DB        cockroach.DB
 	UserStore user.Store
+	JwtParser jwt.Jwt
 }
 
 var Config config.Config = config.GetConfig()
 
-func NewAuth(db cockroach.DB, us user.Store) *Auth {
+func NewAuth(db cockroach.DB, us user.Store, jwtParser jwt.Jwt) *Auth {
 	return &Auth{
 		DB:        db,
 		UserStore: us,
+		JwtParser: jwtParser,
 	}
 }
 
@@ -50,9 +52,7 @@ func (h *Auth) Login(ctx *gin.Context) {
 		return
 	}
 
-	jwtParser := jwt.Jwt{SigningSecret: Config.JwtSigningSecret}
-
-	token, err := jwtParser.GenerateToken(user.Username, 20, make(map[string]interface{}))
+	token, err := h.JwtParser.GenerateToken(user.Username, 20, make(map[string]interface{}))
 
 	if err != nil {
 		SetResponse(ctx, response, err)

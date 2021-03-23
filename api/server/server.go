@@ -6,6 +6,7 @@ import (
 	"github.com/bira37/go-rest-api/api/middleware"
 	"github.com/bira37/go-rest-api/api/store"
 	"github.com/bira37/go-rest-api/pkg/cockroach"
+	"github.com/bira37/go-rest-api/pkg/jwt"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,11 +14,12 @@ import (
 var (
 	Config      = config.GetConfig()
 	CockroachDB = cockroach.NewCockroachDB(Config.SQLDBConnectionString)
+	JwtParser   = jwt.NewJwt(Config.JwtSigningSecret)
 )
 
 // Middlewares
 var (
-	AuthMiddleware = middleware.NewAuthMiddleware()
+	AuthMiddleware = middleware.NewAuthMiddleware(JwtParser)
 )
 
 // Stores
@@ -28,7 +30,7 @@ var (
 // Handlers
 var (
 	UserRestHandler = rest.NewUser(CockroachDB, UserStore)
-	AuthRestHandler = rest.NewAuth(CockroachDB, UserStore)
+	AuthRestHandler = rest.NewAuth(CockroachDB, UserStore, JwtParser)
 )
 
 // SetupServer setups middlewares, routes and handlers, returning a ready-to-start server
