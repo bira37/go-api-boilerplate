@@ -5,8 +5,8 @@ import (
 
 	"github.com/bira37/go-rest-api/api/config"
 	"github.com/bira37/go-rest-api/api/domain/auth"
-	"github.com/bira37/go-rest-api/api/domain/db"
 	"github.com/bira37/go-rest-api/api/domain/user"
+	"github.com/bira37/go-rest-api/pkg/cockroach"
 	"github.com/bira37/go-rest-api/pkg/jwt"
 	"github.com/bira37/go-rest-api/pkg/password"
 	"github.com/gin-gonic/gin"
@@ -14,13 +14,13 @@ import (
 )
 
 type Auth struct {
-	DB        db.DB
+	DB        cockroach.DB
 	UserStore user.Store
 }
 
 var Config config.Config = config.GetConfig()
 
-func NewAuth(db db.DB, us user.Store) *Auth {
+func NewAuth(db cockroach.DB, us user.Store) *Auth {
 	return &Auth{
 		DB:        db,
 		UserStore: us,
@@ -38,7 +38,7 @@ func (h *Auth) Login(ctx *gin.Context) {
 
 	connection := h.DB.GetConnection()
 
-	user, err := h.UserStore.FindByUsername(request.Username, connection)
+	user, err := h.UserStore.FindByUsername(connection, request.Username)
 
 	if err != nil {
 		SetResponse(ctx, response, err)
@@ -77,7 +77,7 @@ func (h *Auth) Register(ctx *gin.Context) {
 
 	connection := h.DB.GetConnection()
 
-	_, err := h.UserStore.FindByUsername(request.Username, connection)
+	_, err := h.UserStore.FindByUsername(connection, request.Username)
 
 	if err == nil {
 		SetResponse(ctx, response, ErrBadRequest("An user with the same username already exists."))
@@ -101,7 +101,7 @@ func (h *Auth) Register(ctx *gin.Context) {
 		Email:        request.Email,
 	}
 
-	_, err = h.UserStore.Insert(newUser, connection)
+	_, err = h.UserStore.Insert(connection, newUser)
 
 	if err != nil {
 		SetResponse(ctx, response, err)

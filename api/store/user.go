@@ -3,8 +3,8 @@ package store
 import (
 	"database/sql"
 
-	"github.com/bira37/go-rest-api/api/domain/db"
 	"github.com/bira37/go-rest-api/api/domain/user"
+	"github.com/bira37/go-rest-api/pkg/cockroach"
 )
 
 type User struct{}
@@ -13,7 +13,7 @@ func NewUser() user.Store {
 	return &User{}
 }
 
-func (r *User) Insert(user user.Model, connection db.Connection) (user.Model, error) {
+func (r *User) Insert(connection cockroach.Connection, user user.Model) (user.Model, error) {
 	_, err := connection.NamedExec(`
 			INSERT INTO users (id, name, username, password_hash, email, created_at, updated_at)
 			VALUES (
@@ -28,13 +28,13 @@ func (r *User) Insert(user user.Model, connection db.Connection) (user.Model, er
 		`, user)
 
 	if err != nil {
-		return user, db.ErrDBInternal(err.Error())
+		return user, ErrDBInternal(err.Error())
 	}
 
 	return user, err
 }
 
-func (r *User) FindByUsername(username string, connection db.Connection) (user.Model, error) {
+func (r *User) FindByUsername(connection cockroach.Connection, username string) (user.Model, error) {
 	var user user.Model
 
 	err := connection.Get(&user, `
@@ -48,8 +48,8 @@ func (r *User) FindByUsername(username string, connection db.Connection) (user.M
 	case nil:
 		return user, nil
 	case sql.ErrNoRows:
-		return user, db.ErrDBNotFound("User not found.")
+		return user, ErrDBNotFound("User not found.")
 	default:
-		return user, db.ErrDBInternal(err.Error())
+		return user, ErrDBInternal(err.Error())
 	}
 }

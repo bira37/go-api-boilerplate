@@ -1,17 +1,17 @@
 package rest
 
 import (
-	"github.com/bira37/go-rest-api/api/domain/db"
 	"github.com/bira37/go-rest-api/api/domain/user"
+	"github.com/bira37/go-rest-api/pkg/cockroach"
 	"github.com/gin-gonic/gin"
 )
 
 type User struct {
-	DB        db.DB
+	DB        cockroach.DB
 	UserStore user.Store
 }
 
-func NewUser(db db.DB, us user.Store) *User {
+func NewUser(db cockroach.DB, us user.Store) *User {
 	return &User{
 		DB:        db,
 		UserStore: us,
@@ -23,7 +23,7 @@ func (h *User) Me(ctx *gin.Context) {
 
 	connection := h.DB.GetConnection()
 
-	dbUser, err := h.UserStore.FindByUsername(username, connection)
+	dbUser, err := h.UserStore.FindByUsername(connection, username)
 
 	response := user.MeResponse{
 		Id:       dbUser.Id,

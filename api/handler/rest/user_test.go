@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bira37/go-rest-api/api/domain/db"
 	"github.com/bira37/go-rest-api/api/domain/user"
 	"github.com/bira37/go-rest-api/api/mock"
+	"github.com/bira37/go-rest-api/api/store"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -50,7 +50,7 @@ func TestMe(t *testing.T) {
 			username:           "fail",
 			expectedExists:     false,
 			expectedResult:     user.Model{},
-			expectedErr:        db.ErrDBNotFound("User not found."),
+			expectedErr:        store.ErrDBNotFound("User not found."),
 			expectedErrorCode:  "not_found",
 			expectedStatusCode: 404,
 		},

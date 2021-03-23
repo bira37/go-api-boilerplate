@@ -10,7 +10,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-var Connection *CockroachDB
+var DBConnection *CockroachDB
 
 type TestItem struct {
 	Id      uuid.UUID
@@ -36,16 +36,16 @@ func TestMain(m *testing.M) {
 
 	rootConnection.db.MustExec(`CREATE DATABASE IF NOT EXISTS cockroachtest;`)
 
-	Connection = NewCockroachDB("postgres://root@localhost:26257/cockroachtest?sslmode=disable")
-	defer Connection.db.Close()
+	DBConnection = NewCockroachDB("postgres://root@localhost:26257/cockroachtest?sslmode=disable")
+	defer DBConnection.db.Close()
 
-	err = Connection.db.Ping()
+	err = DBConnection.db.Ping()
 
 	if err != nil {
 		panic(fmt.Sprintf("Could not establish connection: %v", err))
 	}
 
-	Connection.db.MustExec(`CREATE TABLE IF NOT EXISTS test_table (id UUID PRIMARY KEY NOT NULL, content TEXT NOT NULL);`)
+	DBConnection.db.MustExec(`CREATE TABLE IF NOT EXISTS test_table (id UUID PRIMARY KEY NOT NULL, content TEXT NOT NULL);`)
 
 	code := m.Run()
 
@@ -55,7 +55,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestCockroachDBStatement(t *testing.T) {
-	connection := Connection.GetConnection()
+	connection := DBConnection.GetConnection()
 
 	values := GenTestItem()
 
@@ -83,14 +83,14 @@ func TestCockroachDBStatement(t *testing.T) {
 func TestCockroachDBTransaction(t *testing.T) {
 	values := []TestItem{GenTestItem(), GenTestItem()}
 
-	_ = Connection.Transaction(func(tx *sqlx.Tx) error {
+	_ = DBConnection.Transaction(func(tx *sqlx.Tx) error {
 		for _, value := range values {
 			tx.MustExec(`INSERT INTO test_table VALUES ($1, $2)`, value.Id, value.Content)
 		}
 		return nil
 	})
 
-	connection := Connection.GetConnection()
+	connection := DBConnection.GetConnection()
 
 	for _, value := range values {
 		var item TestItem
@@ -105,7 +105,7 @@ func TestCockroachDBTransaction(t *testing.T) {
 		}
 	}
 
-	_ = Connection.Transaction(func(tx *sqlx.Tx) error {
+	_ = DBConnection.Transaction(func(tx *sqlx.Tx) error {
 		for _, value := range values {
 			res := tx.MustExec(`DELETE FROM test_table WHERE id = $1`, value.Id)
 
@@ -122,7 +122,7 @@ func TestCockroachDBTransaction(t *testing.T) {
 func TestCockroachDBTransactionRollback(t *testing.T) {
 	value := GenTestItem()
 
-	err := Connection.Transaction(func(tx *sqlx.Tx) error {
+	err := DBConnection.Transaction(func(tx *sqlx.Tx) error {
 		tx.MustExec(`INSERT INTO test_table VALUES ($1, $2)`, value.Id, value.Content)
 		return fmt.Errorf("forced error")
 	})
@@ -133,7 +133,7 @@ func TestCockroachDBTransactionRollback(t *testing.T) {
 
 	var item TestItem
 
-	err = Connection.GetConnection().Get(&item, `SELECT * FROM test_table WHERE id = $1`, value.Id)
+	err = DBConnection.GetConnection().Get(&item, `SELECT * FROM test_table WHERE id = $1`, value.Id)
 
 	if err == nil {
 		t.Error("expected query returns no rows and return error")

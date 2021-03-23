@@ -57,13 +57,13 @@ func TestInsert(t *testing.T) {
 
 	connection := Connection.GetConnection()
 
-	_, err := store.Insert(mockUser, connection)
+	_, err := store.Insert(connection, mockUser)
 
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
 
-	_, err = store.Insert(mockUser, connection)
+	_, err = store.Insert(connection, mockUser)
 
 	if err == nil {
 		t.Errorf("expected error inserting user with same username and id")
@@ -77,13 +77,13 @@ func TestFindByUsername(t *testing.T) {
 
 	connection := Connection.GetConnection()
 
-	_, err := store.Insert(mockUser, connection)
+	_, err := store.Insert(connection, mockUser)
 
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
 
-	dbUser, err := store.FindByUsername(mockUser.Username, connection)
+	dbUser, err := store.FindByUsername(connection, mockUser.Username)
 
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
@@ -100,7 +100,7 @@ func TestStoreUnderTransaction(t *testing.T) {
 	connection := Connection.GetConnection()
 
 	err := Connection.Transaction(func(tx *sqlx.Tx) error {
-		_, err := store.Insert(mockUser, tx)
+		_, err := store.Insert(tx, mockUser)
 
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
@@ -113,7 +113,7 @@ func TestStoreUnderTransaction(t *testing.T) {
 		t.Errorf("unexpected error: %v", err)
 	}
 
-	dbUser, err := store.FindByUsername(mockUser.Username, connection)
+	dbUser, err := store.FindByUsername(connection, mockUser.Username)
 
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)

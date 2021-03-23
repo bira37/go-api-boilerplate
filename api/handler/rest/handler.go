@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/bira37/go-rest-api/api/domain/db"
+	"github.com/bira37/go-rest-api/api/store"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
@@ -74,9 +74,9 @@ func returnError(c *gin.Context, err error) {
 	httpError, parseOk := err.(*Error)
 
 	if !parseOk {
-		dberr, dbErrOk := err.(*db.Error)
-		if dbErrOk {
-			httpError = mapDBError(dberr)
+		storeErr, storeErrOk := err.(*store.Error)
+		if storeErrOk {
+			httpError = mapStoreError(storeErr)
 		} else {
 			httpError = ErrInternalServer(err.Error())
 		}
@@ -107,11 +107,11 @@ func buildValidationError(err validator.ValidationErrors) string {
 	return message
 }
 
-func mapDBError(err *db.Error) *Error {
+func mapStoreError(err *store.Error) *Error {
 	switch err.Code {
-	case db.ErrDBNotFound("").Code:
+	case store.ErrDBNotFound("").Code:
 		return ErrNotFound(err.Message)
-	case db.ErrDBInternal("").Code:
+	case store.ErrDBInternal("").Code:
 		return ErrInternalServer(err.Message)
 	default:
 		return ErrInternalServer("Internal error.")

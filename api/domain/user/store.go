@@ -3,7 +3,7 @@ package user
 import (
 	"time"
 
-	"github.com/bira37/go-rest-api/api/domain/db"
+	"github.com/bira37/go-rest-api/pkg/cockroach"
 	"github.com/google/uuid"
 )
 
@@ -18,6 +18,6 @@ type Model struct {
 }
 
 type Store interface {
-	FindByUsername(username string, connection db.Connection) (Model, error)
-	Insert(user Model, connection db.Connection) (Model, error)
+	FindByUsername(connection cockroach.Connection, username string) (Model, error)
+	Insert(connection cockroach.Connection, user Model) (Model, error)
 }
