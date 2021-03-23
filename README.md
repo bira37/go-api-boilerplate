@@ -6,6 +6,7 @@ This API model was made using:
 - [Gin (gin-gonic)](https://github.com/gin-gonic/gin) to construct API handlers and middlewares
 - [Sqlx (jmoiron/sqlx)](https://github.com/jmoiron/sqlx) to make the database access layer
 - [Testify (stretchr/testify)](https://github.com/stretchr/testify) for mocking dependencies on unit testing
+- [GoCov (axw/gocov)](https://github.com/axw/gocov) to generate the consolidated test coverage
 
 ## Migrations
 
@@ -24,4 +25,5 @@ Tests were made using stdlib testing package. They can be executed using the fol
 go test ./... # Execute tests
 go test  -coverprofile coverage.out ./... # Execute tests and generate coverage output
 go tool cover -html=coverage.out -o coverage.html # Generate coverage.html file for better coverage visualization
+gocov convert coverage.out | gocov report # Visualize consolidated coverage
 ```
