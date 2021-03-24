@@ -8,7 +8,7 @@ import (
 
 var Config config.Config = config.GetConfig()
 
-func NewAuthMiddleware(jwtParser jwt.Jwt) func(c *gin.Context) {
+func NewAuthMiddleware() func(c *gin.Context) {
 	return func(c *gin.Context) {
 		tokenString := c.Request.Header.Get("X-Access-Token")
 
@@ -19,6 +19,8 @@ func NewAuthMiddleware(jwtParser jwt.Jwt) func(c *gin.Context) {
 			})
 			return
 		}
+
+		jwtParser := jwt.NewJwt(Config.JwtSigningSecret)
 
 		claims, err := jwtParser.ParseToken(tokenString)
 

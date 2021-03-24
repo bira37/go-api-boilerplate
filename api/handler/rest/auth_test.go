@@ -11,6 +11,7 @@ import (
 	"github.com/bira37/go-rest-api/api/domain/user"
 	"github.com/bira37/go-rest-api/api/mock"
 	"github.com/bira37/go-rest-api/api/store"
+	"github.com/bira37/go-rest-api/pkg/jwt"
 	"github.com/gin-gonic/gin"
 	tmock "github.com/stretchr/testify/mock"
 )
@@ -65,15 +66,11 @@ func TestLogin(t *testing.T) {
 
 		mockDb := new(mock.MockDB)
 		mockUserStore := new(mock.MockUserStore)
-		mockJwt := new(mock.MockJwt)
+		jwtParser := jwt.NewJwt(Config.JwtSigningSecret)
 
-		handler := NewAuth(mockDb, mockUserStore, mockJwt)
+		handler := NewAuth(mockDb, mockUserStore)
 
 		mockUserStore.On("FindByUsername", tmock.Anything, tc.username).Return(tc.expectedResult, tc.expectedStoreErr)
-
-		if tc.success {
-			mockJwt.On("GenerateToken", tc.username, tmock.Anything, tmock.Anything).Return(tc.expectedToken, nil)
-		}
 
 		r.POST("/test-login", handler.Login)
 
@@ -107,8 +104,14 @@ func TestLogin(t *testing.T) {
 				t.Errorf("unexpected error: %v", err)
 			}
 
-			if tc.expectedToken != loginResponse.Token {
-				t.Errorf("expected token %v, got %v", tc.expectedToken, loginResponse.Token)
+			tokenClaims, err := jwtParser.ParseToken(loginResponse.Token)
+
+			if err != nil {
+				t.Errorf("unexpected error: %v", err)
+			}
+
+			if tokenClaims["sub"] != tc.username {
+				t.Errorf("invalid token. expected user %v, got %v", tc.username, tokenClaims["sub"])
 			}
 		} else {
 			var errorMsg ErrorResponse
@@ -125,6 +128,5 @@ func TestLogin(t *testing.T) {
 		}
 
 		mockUserStore.AssertExpectations(t)
-		mockJwt.AssertExpectations(t)
 	}
 }

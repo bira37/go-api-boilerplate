@@ -16,7 +16,7 @@ func TestAuthMiddleware(t *testing.T) {
 
 	jwtParser := jwt.NewJwt(Config.JwtSigningSecret)
 
-	r.Use(NewAuthMiddleware(jwtParser))
+	r.Use(NewAuthMiddleware())
 
 	r.GET("/test", func(c *gin.Context) {
 		user, exists := c.Get("username")
