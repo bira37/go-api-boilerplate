@@ -11,11 +11,11 @@ type MockUserStore struct {
 }
 
 func (s *MockUserStore) Insert(connection cockroach.Connection, model user.Model) (user.Model, error) {
-	args := s.Called(model, connection)
+	args := s.Called(connection, model)
 	return args.Get(0).(user.Model), args.Error(1)
 }
 
 func (s *MockUserStore) FindByUsername(connection cockroach.Connection, username string) (user.Model, error) {
-	args := s.Called(username, connection)
+	args := s.Called(connection, username)
 	return args.Get(0).(user.Model), args.Error(1)
 }

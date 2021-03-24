@@ -10,14 +10,20 @@ import (
 	"github.com/bira37/go-rest-api/api/domain/user"
 	"github.com/bira37/go-rest-api/api/mock"
 	"github.com/bira37/go-rest-api/api/store"
+	"github.com/bira37/go-rest-api/pkg/password"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	tmock "github.com/stretchr/testify/mock"
 )
 
-func GenUser(username string) user.Model {
+func GenUser(username string, passwd string) user.Model {
 	faker := gofakeit.NewCrypto()
+	hash, err := password.HashPassword(passwd)
+
+	if err != nil {
+		panic(err)
+	}
 
 	return user.Model{
 		Id:           uuid.New(),
@@ -25,7 +31,7 @@ func GenUser(username string) user.Model {
 		UpdatedAt:    time.Now().UTC(),
 		Name:         faker.Name(),
 		Username:     username,
-		PasswordHash: faker.Password(true, true, true, false, false, 20),
+		PasswordHash: hash,
 		Email:        faker.Email(),
 	}
 }
@@ -35,22 +41,22 @@ func TestMe(t *testing.T) {
 		username           string
 		expectedExists     bool
 		expectedResult     user.Model
-		expectedErr        error
+		expectedStoreErr   error
 		expectedErrorCode  string
 		expectedStatusCode int
 	}{
 		{
 			username:           "success",
 			expectedExists:     true,
-			expectedResult:     GenUser("success"),
-			expectedErr:        nil,
+			expectedResult:     GenUser("success", "password"),
+			expectedStoreErr:   nil,
 			expectedStatusCode: 200,
 		},
 		{
 			username:           "fail",
 			expectedExists:     false,
 			expectedResult:     user.Model{},
-			expectedErr:        store.ErrDBNotFound("User not found."),
+			expectedStoreErr:   store.ErrDBNotFound(""),
 			expectedErrorCode:  "not_found",
 			expectedStatusCode: 404,
 		},
@@ -66,7 +72,7 @@ func TestMe(t *testing.T) {
 
 		handler := NewUser(mockDb, mockUserStore)
 
-		mockUserStore.On("FindByUsername", tc.username, tmock.Anything).Return(tc.expectedResult, tc.expectedErr)
+		mockUserStore.On("FindByUsername", tmock.Anything, tc.username).Return(tc.expectedResult, tc.expectedStoreErr)
 
 		r.Use(func(c *gin.Context) {
 			c.Set("username", tc.username)
