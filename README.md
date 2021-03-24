@@ -27,3 +27,10 @@ go test  -coverprofile coverage.out ./... # Execute tests and generate coverage 
 go tool cover -html=coverage.out -o coverage.html # Generate coverage.html file for better coverage visualization
 gocov convert coverage.out | gocov report # Visualize consolidated coverage
 ```
+
+## TODO
+
+- Rest Handler utility test
+- Register rest handler test
+- Integration tests
+- Add retry logic to CockroachDB transaction
