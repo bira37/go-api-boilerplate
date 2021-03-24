@@ -5,6 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/bira37/go-rest-api/api/config"
 	"github.com/bira37/go-rest-api/pkg/jwt"
 	"github.com/gin-gonic/gin"
 )
@@ -14,7 +15,7 @@ func TestAuthMiddleware(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	c, r := gin.CreateTestContext(res)
 
-	jwtParser := jwt.NewJwt(Config.JwtSigningSecret)
+	jwtParser := jwt.NewJwt(config.JwtSigningSecret)
 
 	r.Use(NewAuthMiddleware())
 

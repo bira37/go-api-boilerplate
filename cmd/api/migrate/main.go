@@ -12,9 +12,8 @@ import (
 )
 
 func main() {
-	Config := config.GetConfig()
 	os.Setenv("GOOSE_DRIVER", "postgres")
-	os.Setenv("GOOSE_DBSTRING", Config.SQLDBConnectionString)
+	os.Setenv("GOOSE_DBSTRING", config.SQLDBConnectionString)
 
 	args := os.Args[1:]
 

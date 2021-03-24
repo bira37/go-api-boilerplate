@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/bira37/go-rest-api/api/config"
 	"github.com/bira37/go-rest-api/api/domain/auth"
 	"github.com/bira37/go-rest-api/api/domain/user"
 	"github.com/bira37/go-rest-api/api/mock"
@@ -66,7 +67,7 @@ func TestLogin(t *testing.T) {
 
 		mockDb := new(mock.MockDB)
 		mockUserStore := new(mock.MockUserStore)
-		jwtParser := jwt.NewJwt(Config.JwtSigningSecret)
+		jwtParser := jwt.NewJwt(config.JwtSigningSecret)
 
 		handler := NewAuth(mockDb, mockUserStore)
 

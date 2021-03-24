@@ -78,9 +78,3 @@ func TestInt64EnvOrDefaultPanics(t *testing.T) {
 
 	assert.Panics(func() { Int64EnvOrDefault("TEST_INT64_ENV_PANIC", 10) })
 }
-
-func TestGetConfig(t *testing.T) {
-	assert := assert.New(t)
-
-	assert.Equal(GetConfig(), GetConfig())
-}

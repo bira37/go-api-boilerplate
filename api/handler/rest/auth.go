@@ -18,8 +18,6 @@ type Auth struct {
 	UserStore user.Store
 }
 
-var Config config.Config = config.GetConfig()
-
 func NewAuth(db cockroach.DB, us user.Store) *Auth {
 	return &Auth{
 		DB:        db,
@@ -50,7 +48,7 @@ func (h *Auth) Login(ctx *gin.Context) {
 		return
 	}
 
-	jwtParser := jwt.NewJwt(Config.JwtSigningSecret)
+	jwtParser := jwt.NewJwt(config.JwtSigningSecret)
 
 	token, err := jwtParser.GenerateToken(user.Username, 20, make(map[string]interface{}))
 

@@ -6,8 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var Config config.Config = config.GetConfig()
-
 func NewAuthMiddleware() func(c *gin.Context) {
 	return func(c *gin.Context) {
 		tokenString := c.Request.Header.Get("X-Access-Token")
@@ -20,7 +18,7 @@ func NewAuthMiddleware() func(c *gin.Context) {
 			return
 		}
 
-		jwtParser := jwt.NewJwt(Config.JwtSigningSecret)
+		jwtParser := jwt.NewJwt(config.JwtSigningSecret)
 
 		claims, err := jwtParser.ParseToken(tokenString)
 

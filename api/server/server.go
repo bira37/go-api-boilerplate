@@ -11,8 +11,7 @@ import (
 
 // Main Configuration
 var (
-	Config      = config.GetConfig()
-	CockroachDB = cockroach.NewCockroachDB(Config.SQLDBConnectionString)
+	CockroachDB = cockroach.NewCockroachDB(config.SQLDBConnectionString)
 )
 
 // Middlewares
