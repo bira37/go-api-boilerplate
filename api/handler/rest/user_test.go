@@ -95,7 +95,7 @@ func TestMe(t *testing.T) {
 			t.Errorf("expected status %v, got %v", tc.expectedStatusCode, res.Result().StatusCode)
 		}
 
-		if tc.expectedExists {
+		if tc.expectedStatusCode == 200 {
 			var meResponse user.MeResponse
 
 			err = json.NewDecoder(res.Body).Decode(&meResponse)

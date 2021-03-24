@@ -90,6 +90,24 @@ func TestFindByUsername(t *testing.T) {
 	}
 
 	checkUserModelEquality(t, mockUser, dbUser)
+
+	_, err = store.FindByUsername(connection, mockUser.Username+"_suffix")
+
+	if err == nil {
+		t.Errorf("expected error, got success")
+	}
+
+	storeErr, ok := err.(*Error)
+
+	if !ok {
+		t.Errorf("expected store error")
+	}
+
+	expectedCode := ErrDBNotFound("").Code
+
+	if storeErr.Code != expectedCode {
+		t.Errorf("expected code %v, got %v", storeErr.Code, expectedCode)
+	}
 }
 
 func TestStoreUnderTransaction(t *testing.T) {
