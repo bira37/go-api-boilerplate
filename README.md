@@ -17,9 +17,20 @@ go run api/cmd/migrate/main.go up # Upgrade database to the latest migration
 go run api/cmd/migrate/main.go create <migration_name> # Create a new empty migration file on api/migrations directory
 ```
 
+## Running the API
+
+To run the API, first you need to start the database contained in `docker-compose.yml` file, and then run the migrations. This can be achieved running:
+
+```
+docker-compose up -d # Start the CockroachDB container
+go run api/cmd/migrate/main.go up # Apply all migrations
+go run api/cmd/migrate/main.go up # Start th REST Server
+```
+
+
 ## Testing
 
-Tests were made using stdlib testing package. To see a detailed coverage visualization, you need to install GoCov CLI. You can execute tests and coverage tool using the following commands:
+This project contains both unit and integration tests. For this reason, you also need to start the database and run all migrations before running them. Tests were made using stdlib testing package. To see a detailed coverage visualization, you need to install GoCov CLI. You can execute tests and coverage tool using the following commands:
 
 ```
 go test ./... # Execute tests
