@@ -12,17 +12,17 @@ type ErrorResponse struct {
 
 func SetResponse(c *gin.Context, obj interface{}, err error) {
 	if err == nil {
-		returnSuccess(c, obj)
+		setSuccess(c, obj)
 	} else {
-		returnError(c, err)
+		setError(c, err)
 	}
 }
 
-func returnSuccess(c *gin.Context, obj interface{}) {
+func setSuccess(c *gin.Context, obj interface{}) {
 	c.JSON(200, obj)
 }
 
-func returnError(c *gin.Context, err error) {
+func setError(c *gin.Context, err error) {
 	httpError, parseOk := err.(*errs.RestError)
 
 	if !parseOk {
