@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/bira37/go-rest-api/api/config"
-	"github.com/bira37/go-rest-api/api/errs"
-	"github.com/bira37/go-rest-api/api/rest"
+	"github.com/bira37/go-rest-api/api/internal/errs"
+	"github.com/bira37/go-rest-api/api/internal/rest"
 	"github.com/bira37/go-rest-api/pkg/cockroach"
 	"github.com/bira37/go-rest-api/pkg/jwt"
 	"github.com/bira37/go-rest-api/pkg/password"

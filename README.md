@@ -10,7 +10,7 @@ This API model was made using:
 
 ## Migrations
 
-Migrations use goose CLI tool. New migrations can be generated executing cmd/api/migrate/main.go
+Migrations use goose CLI tool. New migrations can be generated executing api/cmd/migrate/main.go
 
 ```
 go run api/cmd/migrate/main.go up # Upgrade database to the latest migration
@@ -30,7 +30,5 @@ gocov convert coverage.out | gocov report # Visualize consolidated coverage
 
 ## TODO
 
-- Rest Handler utility test
-- Register rest handler test
+- rest package test
 - Integration tests
-- Add retry logic to CockroachDB transaction

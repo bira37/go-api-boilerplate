@@ -2,8 +2,8 @@ package server
 
 import (
 	"github.com/bira37/go-rest-api/api/config"
-	"github.com/bira37/go-rest-api/api/middleware"
-	"github.com/bira37/go-rest-api/api/user"
+	"github.com/bira37/go-rest-api/api/internal/middleware"
+	"github.com/bira37/go-rest-api/api/internal/user"
 	"github.com/bira37/go-rest-api/pkg/cockroach"
 	"github.com/gin-gonic/gin"
 )

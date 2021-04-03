@@ -15,7 +15,7 @@ func NewMockUserStore() *MockUserStore {
 
 func (s *MockUserStore) Insert(connection cockroach.Connection, model Model) (Model, error) {
 	args := s.Called(connection, model)
-	return args.Get(0).(Model), args.Error(1)
+	return model, args.Error(1)
 }
 
 func (s *MockUserStore) FindByUsername(connection cockroach.Connection, username string) (Model, error) {

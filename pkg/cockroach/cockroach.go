@@ -3,9 +3,11 @@ package cockroach
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 	_ "github.com/lib/pq"
 )
 
@@ -48,26 +50,48 @@ func NewCockroachDB(connectionString string) *CockroachDB {
 }
 
 func (s *CockroachDB) Transaction(fn func(*sqlx.Tx) error) error {
-	tx, err := s.db.Beginx()
+	retries := 0
 
-	if err != nil {
-		return err
-	}
+	// retry at most 50 times
+	for {
+		retries++
 
-	if err := fn(tx); err != nil {
-		defer func() {
-			if err := tx.Rollback(); err != nil {
-				fmt.Println(err.Error())
+		if retries > 50 {
+			fmt.Println("Transaction maximum retries reached.")
+			return errors.New("Transaction maximum retries reached.")
+		}
+
+		// begin transaction
+		tx, err := s.db.Beginx()
+
+		if err != nil {
+			return err
+		}
+
+		// if gets error on execution, just stop and rollback
+		if err := fn(tx); err != nil {
+			defer func() {
+				if err := tx.Rollback(); err != nil {
+					fmt.Println(err.Error())
+				}
+			}()
+			return err
+		}
+
+		// try to commit
+		err = tx.Commit()
+
+		// check if error code was 40001 (serialization error) and retry if necessary
+		if err != nil {
+			if pgerr, ok := err.(*pq.Error); ok {
+				if pgerr.Code == "40001" {
+					continue
+				}
 			}
-		}()
-		return err
+			return err
+		}
+		return nil
 	}
-
-	err = tx.Commit()
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func (s *CockroachDB) GetConnection() *sqlx.DB {

@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/bira37/go-rest-api/api/errs"
+	"github.com/bira37/go-rest-api/api/internal/errs"
 	"github.com/bira37/go-rest-api/pkg/cockroach"
 	"github.com/google/uuid"
 )

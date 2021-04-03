@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/bira37/go-rest-api/api/config"
-	"github.com/bira37/go-rest-api/api/errs"
+	"github.com/bira37/go-rest-api/api/internal/errs"
 	"github.com/bira37/go-rest-api/pkg/cockroach"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/google/uuid"

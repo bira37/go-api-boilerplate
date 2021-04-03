@@ -9,7 +9,8 @@ import (
 	"time"
 
 	"github.com/bira37/go-rest-api/api/config"
-	"github.com/bira37/go-rest-api/api/errs"
+	"github.com/bira37/go-rest-api/api/internal/errs"
+	"github.com/bira37/go-rest-api/api/internal/rest"
 	"github.com/bira37/go-rest-api/pkg/cockroach"
 	"github.com/bira37/go-rest-api/pkg/jwt"
 	"github.com/bira37/go-rest-api/pkg/password"
@@ -18,11 +19,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/mock"
 )
-
-type ErrorResponse struct {
-	Message string
-	Code    string
-}
 
 func GenUser(username string, passwd string) Model {
 	faker := gofakeit.NewCrypto()
@@ -118,7 +114,7 @@ func TestMe(t *testing.T) {
 				t.Errorf("error: expected equivalent to '%v', got '%v'", tc.expectedResult, meResponse)
 			}
 		} else {
-			var errorMsg ErrorResponse
+			var errorMsg rest.ErrorResponse
 
 			err = json.NewDecoder(res.Body).Decode(&errorMsg)
 
@@ -233,7 +229,7 @@ func TestLogin(t *testing.T) {
 				t.Errorf("invalid token. expected user %v, got %v", tc.username, tokenClaims["sub"])
 			}
 		} else {
-			var errorMsg ErrorResponse
+			var errorMsg rest.ErrorResponse
 
 			err = json.NewDecoder(res.Body).Decode(&errorMsg)
 
@@ -243,6 +239,101 @@ func TestLogin(t *testing.T) {
 
 			if errorMsg.Code != tc.expectedErrorCode {
 				t.Errorf("expected code %v, got %v", tc.expectedErrorCode, errorMsg.Code)
+			}
+		}
+
+		mockUserStore.AssertExpectations(t)
+	}
+}
+
+func TestRegister(t *testing.T) {
+	tests := []struct {
+		request            RegisterRequest
+		expectedStatusCode int
+		expectedStoreErr   error
+		expectedResponse   RegisterResponse
+		success            bool
+		expectedError      rest.ErrorResponse
+	}{
+		{
+			request:            RegisterRequest{Username: "correct", Password: "password", Name: "Test", Email: "test@example.com"},
+			expectedStatusCode: 200,
+			expectedStoreErr:   errs.StoreNotFound(""),
+			success:            true,
+			expectedResponse:   RegisterResponse{Message: "Registered Test"},
+		},
+		{
+			request:            RegisterRequest{Username: "correct", Password: "password", Name: "Test", Email: "test@example.com"},
+			expectedStatusCode: 400,
+			success:            false,
+			expectedStoreErr:   nil,
+			expectedError:      rest.ErrorResponse{Message: "An user with the same username already exists.", Code: "bad_request"},
+		},
+	}
+
+	for _, tc := range tests {
+		res := httptest.NewRecorder()
+		gin.SetMode(gin.TestMode)
+		c, r := gin.CreateTestContext(res)
+
+		mockDb := cockroach.NewMockDB()
+		mockUserStore := NewMockUserStore()
+
+		handler := NewRestHandler(mockDb, mockUserStore)
+
+		mockUserStore.On("FindByUsername", mock.Anything, tc.request.Username).Return(GenUser(tc.request.Username, tc.request.Password), tc.expectedStoreErr)
+
+		if tc.success {
+			mockUserStore.On("Insert", mock.Anything, mock.Anything).Return(Model{}, nil)
+		}
+
+		r.POST("/test-register", handler.Register)
+
+		body, err := json.Marshal(tc.request)
+
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+
+		c.Request, err = http.NewRequest(http.MethodPost, "/test-register", bytes.NewBuffer(body))
+
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+
+		r.ServeHTTP(res, c.Request)
+
+		if res.Result().StatusCode != tc.expectedStatusCode {
+			t.Errorf("expected status %v, got %v", tc.expectedStatusCode, res.Result().StatusCode)
+		}
+
+		if tc.expectedStatusCode == 200 {
+			var registerResponse RegisterResponse
+
+			err = json.NewDecoder(res.Body).Decode(&registerResponse)
+
+			if err != nil {
+				t.Errorf("unexpected error: %v", err)
+			}
+
+			if registerResponse.Message != tc.expectedResponse.Message {
+				t.Errorf("unexpected message. expected '%v', but found '%v'", tc.expectedResponse.Message, registerResponse.Message)
+			}
+		} else {
+			var errorMsg rest.ErrorResponse
+
+			err = json.NewDecoder(res.Body).Decode(&errorMsg)
+
+			if err != nil {
+				t.Errorf("unexpected error: '%v'", err)
+			}
+
+			if errorMsg.Code != tc.expectedError.Code {
+				t.Errorf("expected code '%v', got '%v'", tc.expectedError.Code, errorMsg.Code)
+			}
+
+			if errorMsg.Message != tc.expectedError.Message {
+				t.Errorf("expected message '%v', got '%v'", tc.expectedError.Message, errorMsg.Message)
 			}
 		}
 

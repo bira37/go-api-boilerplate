@@ -25,3 +25,14 @@ func StoreNotFound(message string) *StoreError {
 func (err *StoreError) Error() string {
 	return fmt.Sprintf("%s: %s", err.Code, err.Message)
 }
+
+func (err *StoreError) ToRestError() *RestError {
+	switch err.Code {
+	case StoreNotFound("").Code:
+		return RestNotFound(err.Message)
+	case StoreInternal("").Code:
+		return RestInternalServer(err.Message)
+	default:
+		return RestInternalServer("Internal error.")
+	}
+}
