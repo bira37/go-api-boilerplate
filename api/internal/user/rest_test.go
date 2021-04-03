@@ -140,7 +140,6 @@ func TestLogin(t *testing.T) {
 		expectedStatusCode int
 		expectedErrorCode  string
 		expectedStoreErr   error
-		expectedToken      string
 		success            bool
 	}{
 		{
@@ -150,7 +149,6 @@ func TestLogin(t *testing.T) {
 			expectedResult:     GenUser("correct", "correctpassword"),
 			expectedStatusCode: 200,
 			expectedStoreErr:   nil,
-			expectedToken:      "token",
 			success:            true,
 		},
 		{

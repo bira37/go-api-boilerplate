@@ -80,7 +80,7 @@ func (r *restHandler) Login(ctx *gin.Context) {
 	}
 
 	response = LoginResponse{
-		Message: "Hello " + user.Name,
+		Message: "Hello, " + user.Name,
 		Token:   token,
 	}
 
