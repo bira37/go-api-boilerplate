@@ -23,7 +23,7 @@ Tests were made using stdlib testing package. They can be executed using the fol
 
 ```
 go test ./... # Execute tests
-go test  -coverprofile coverage.out ./... # Execute tests and generate coverage output
+go test -coverpkg ./... -coverprofile coverage.out ./... # Execute tests and generate coverage output also for external packages
 go tool cover -html=coverage.out -o coverage.html # Generate coverage.html file for better coverage visualization
 gocov convert coverage.out | gocov report # Visualize consolidated coverage
 ```
