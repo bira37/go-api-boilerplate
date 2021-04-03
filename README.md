@@ -19,10 +19,11 @@ go run api/cmd/migrate/main.go create <migration_name> # Create a new empty migr
 
 ## Testing
 
-Tests were made using stdlib testing package. They can be executed using the following commands:
+Tests were made using stdlib testing package. To see a detailed coverage visualization, you need to install GoCov CLI. You can execute tests and coverage tool using the following commands:
 
 ```
 go test ./... # Execute tests
+go test -coverprofile coverage.out ./... # Execute tests and generate coverage output also for external packages
 go test -coverpkg ./... -coverprofile coverage.out ./... # Execute tests and generate coverage output also for external packages
 go tool cover -html=coverage.out -o coverage.html # Generate coverage.html file for better coverage visualization
 gocov convert coverage.out | gocov report # Visualize consolidated coverage

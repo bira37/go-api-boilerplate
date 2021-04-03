@@ -14,12 +14,8 @@ var DB *cockroach.CockroachDB
 
 func TestMain(m *testing.M) {
 	DB = cockroach.NewCockroachDB(config.SQLDBConnectionString)
-	ClearData()
+	ClearData(DB)
 	Server = httptest.NewServer(server.SetupRestServer())
 	defer Server.Close()
 	m.Run()
-}
-
-func ClearData() {
-	DB.GetConnection().MustExec("DELETE FROM users WHERE TRUE;")
 }
