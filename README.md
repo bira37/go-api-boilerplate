@@ -31,4 +31,4 @@ gocov convert coverage.out | gocov report # Visualize consolidated coverage
 
 ## TODO
 
-- Integration tests
+- gRPC sample with tests
