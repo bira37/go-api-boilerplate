@@ -30,5 +30,4 @@ gocov convert coverage.out | gocov report # Visualize consolidated coverage
 
 ## TODO
 
-- rest package test
 - Integration tests
