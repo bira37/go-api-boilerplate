@@ -89,7 +89,7 @@ func (s *CockroachDB) Transaction(fn func(*sqlx.Tx) error) error {
 		if err != nil {
 			if pgerr, ok := err.(*pq.Error); ok {
 				if pgerr.Code == "40001" {
-					timems := int(math.Pow(2, float64(retries/5))) + rand.Intn(100)
+					timems := int(math.Pow(2, float64(retries/10))) + rand.Intn(100)
 					time.Sleep(time.Duration(timems) * time.Millisecond)
 					continue
 				}

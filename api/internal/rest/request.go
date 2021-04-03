@@ -34,13 +34,13 @@ func formatUnmarshallTypeError(err *json.UnmarshalTypeError) string {
 func formatValidationErrors(err validator.ValidationErrors) string {
 	var message string
 	if len(err) > 1 {
-		message += "Several errors occurred:\n"
+		message += "Several errors occurred:"
 	}
 	for _, elem := range err {
 		if elem.ActualTag() == "required" {
-			message += fmt.Sprintf("'%s' is required.\n", elem.Field())
+			message += fmt.Sprintf("\n'%s' is required.", elem.Field())
 		} else {
-			message += fmt.Sprintf("Value for '%s' is invalid.\n", elem.Field())
+			message += fmt.Sprintf("\nValue for '%s' is invalid.", elem.Field())
 		}
 	}
 	return message
