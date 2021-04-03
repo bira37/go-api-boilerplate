@@ -5,6 +5,9 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"math"
+	"math/rand"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
@@ -51,6 +54,7 @@ func NewCockroachDB(connectionString string) *CockroachDB {
 
 func (s *CockroachDB) Transaction(fn func(*sqlx.Tx) error) error {
 	retries := 0
+	rand.Seed(time.Now().UTC().UnixNano())
 
 	// retry at most 50 times
 	for {
@@ -85,6 +89,8 @@ func (s *CockroachDB) Transaction(fn func(*sqlx.Tx) error) error {
 		if err != nil {
 			if pgerr, ok := err.(*pq.Error); ok {
 				if pgerr.Code == "40001" {
+					timems := int(math.Pow(2, float64(retries/5))) + rand.Intn(100)
+					time.Sleep(time.Duration(timems) * time.Millisecond)
 					continue
 				}
 			}
