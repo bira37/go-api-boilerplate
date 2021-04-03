@@ -31,7 +31,7 @@ var (
 )
 
 // SetupServer setups middlewares, routes and handlers, returning a ready-to-start server
-func SetupServer() *gin.Engine {
+func SetupRestServer() *gin.Engine {
 	router := gin.Default()
 
 	SetupRoutes(router)

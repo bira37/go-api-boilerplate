@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	router := server.SetupServer()
+	router := server.SetupRestServer()
 
 	if err := router.Run(":7000"); err != nil {
 		log.Fatalln(err.Error())

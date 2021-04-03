@@ -8,7 +8,7 @@ import (
 )
 
 func TestServer(t *testing.T) {
-	ts := httptest.NewServer(SetupServer())
+	ts := httptest.NewServer(SetupRestServer())
 
 	defer ts.Close()
 
