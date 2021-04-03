@@ -2,9 +2,8 @@ package server
 
 import (
 	"github.com/bira37/go-rest-api/api/config"
-	"github.com/bira37/go-rest-api/api/handler/rest"
 	"github.com/bira37/go-rest-api/api/middleware"
-	"github.com/bira37/go-rest-api/api/store"
+	"github.com/bira37/go-rest-api/api/user"
 	"github.com/bira37/go-rest-api/pkg/cockroach"
 	"github.com/gin-gonic/gin"
 )
@@ -21,13 +20,12 @@ var (
 
 // Stores
 var (
-	UserStore = store.NewUser()
+	UserStore = user.NewStore()
 )
 
 // Handlers
 var (
-	UserRestHandler = rest.NewUser(CockroachDB, UserStore)
-	AuthRestHandler = rest.NewAuth(CockroachDB, UserStore)
+	UserRestHandler = user.NewRestHandler(CockroachDB, UserStore)
 )
 
 // SetupServer setups middlewares, routes and handlers, returning a ready-to-start server
@@ -46,8 +44,8 @@ func SetupRoutes(r *gin.Engine) {
 	{
 		auth := public.Group("/auth")
 		{
-			auth.POST("/login", AuthRestHandler.Login)
-			auth.POST("/register", AuthRestHandler.Register)
+			auth.POST("/login", UserRestHandler.Login)
+			auth.POST("/register", UserRestHandler.Register)
 		}
 	}
 

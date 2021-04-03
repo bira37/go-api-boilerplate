@@ -13,8 +13,8 @@ This API model was made using:
 Migrations use goose CLI tool. New migrations can be generated executing cmd/api/migrate/main.go
 
 ```
-go run cmd/api/migrate/main.go up # Upgrade database to the latest migration
-go run cmd/api/migrate/main.go create <migration_name> # Create a new empty migration file on api/migrations directory
+go run api/cmd/migrate/main.go up # Upgrade database to the latest migration
+go run api/cmd/migrate/main.go create <migration_name> # Create a new empty migration file on api/migrations directory
 ```
 
 ## Testing

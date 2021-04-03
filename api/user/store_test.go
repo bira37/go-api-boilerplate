@@ -1,20 +1,22 @@
-package store
+package user
 
 import (
 	"reflect"
 	"testing"
 	"time"
 
-	"github.com/bira37/go-rest-api/api/domain/user"
+	"github.com/bira37/go-rest-api/api/config"
+	"github.com/bira37/go-rest-api/api/errs"
+	"github.com/bira37/go-rest-api/pkg/cockroach"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
-func GenUser() user.Model {
+func GenRandomUser() Model {
 	faker := gofakeit.NewCrypto()
 
-	return user.Model{
+	return Model{
 		Id:           uuid.New(),
 		CreatedAt:    time.Now().UTC(),
 		UpdatedAt:    time.Now().UTC(),
@@ -25,7 +27,7 @@ func GenUser() user.Model {
 	}
 }
 
-func checkUserModelEquality(t *testing.T, a user.Model, b user.Model) {
+func checkUserModelEquality(t *testing.T, a Model, b Model) {
 	deltaCreated := a.CreatedAt.Sub(b.CreatedAt)
 
 	if deltaCreated.Seconds() >= 1 {
@@ -51,19 +53,19 @@ func checkUserModelEquality(t *testing.T, a user.Model, b user.Model) {
 }
 
 func TestInsert(t *testing.T) {
-	store := User{}
+	store := NewStore()
 
-	mockUser := GenUser()
+	mockUser := GenRandomUser()
 
-	connection := Connection.GetConnection()
+	connection := cockroach.NewCockroachDB(config.SQLDBConnectionString)
 
-	_, err := store.Insert(connection, mockUser)
+	_, err := store.Insert(connection.GetConnection(), mockUser)
 
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
 
-	_, err = store.Insert(connection, mockUser)
+	_, err = store.Insert(connection.GetConnection(), mockUser)
 
 	if err == nil {
 		t.Errorf("expected error inserting user with same username and id")
@@ -71,19 +73,19 @@ func TestInsert(t *testing.T) {
 }
 
 func TestFindByUsername(t *testing.T) {
-	store := User{}
+	store := NewStore()
 
-	mockUser := GenUser()
+	mockUser := GenRandomUser()
 
-	connection := Connection.GetConnection()
+	connection := cockroach.NewCockroachDB(config.SQLDBConnectionString)
 
-	_, err := store.Insert(connection, mockUser)
+	_, err := store.Insert(connection.GetConnection(), mockUser)
 
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
 
-	dbUser, err := store.FindByUsername(connection, mockUser.Username)
+	dbUser, err := store.FindByUsername(connection.GetConnection(), mockUser.Username)
 
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
@@ -91,19 +93,19 @@ func TestFindByUsername(t *testing.T) {
 
 	checkUserModelEquality(t, mockUser, dbUser)
 
-	_, err = store.FindByUsername(connection, mockUser.Username+"_suffix")
+	_, err = store.FindByUsername(connection.GetConnection(), mockUser.Username+"_suffix")
 
 	if err == nil {
 		t.Errorf("expected error, got success")
 	}
 
-	storeErr, ok := err.(*Error)
+	storeErr, ok := err.(*errs.StoreError)
 
 	if !ok {
 		t.Errorf("expected store error")
 	}
 
-	expectedCode := ErrDBNotFound("").Code
+	expectedCode := errs.StoreNotFound("").Code
 
 	if storeErr.Code != expectedCode {
 		t.Errorf("expected code %v, got %v", storeErr.Code, expectedCode)
@@ -111,13 +113,13 @@ func TestFindByUsername(t *testing.T) {
 }
 
 func TestStoreUnderTransaction(t *testing.T) {
-	store := User{}
+	store := NewStore()
 
-	mockUser := GenUser()
+	mockUser := GenRandomUser()
 
-	connection := Connection.GetConnection()
+	connection := cockroach.NewCockroachDB(config.SQLDBConnectionString)
 
-	err := Connection.Transaction(func(tx *sqlx.Tx) error {
+	err := connection.Transaction(func(tx *sqlx.Tx) error {
 		_, err := store.Insert(tx, mockUser)
 
 		if err != nil {
@@ -131,7 +133,7 @@ func TestStoreUnderTransaction(t *testing.T) {
 		t.Errorf("unexpected error: %v", err)
 	}
 
-	dbUser, err := store.FindByUsername(connection, mockUser.Username)
+	dbUser, err := store.FindByUsername(connection.GetConnection(), mockUser.Username)
 
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
